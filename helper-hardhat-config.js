@@ -35,8 +35,6 @@ const networkConfig = {
 const developmentChains = ["hardhat", "localhost", "ganache"]
 const VERIFICATION_BLOCK_CONFIRMATIONS = 6
 const frontEndContractsFile = "./constants/contractAddresses.json"
-const frontEndAbiFile = "./constants/abi.json"
-const frontEndBytecode = "./constants/bytecode.json"
 
 module.exports = {
     networkConfig,

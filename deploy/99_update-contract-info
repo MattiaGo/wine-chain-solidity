@@ -1,0 +1,39 @@
+const { frontEndContractsFile } = require("../helper-hardhat-config")
+const fs = require("fs")
+const path = require("path")
+const { network } = require("hardhat")
+const solc = require("solc")
+
+const CHAIN_ID = "WINE CONSORTIUM"
+const STEP = ["Grape Grower", "Wine Producer", "Bulk Distributor", "Filler-Packer", "Distributor"]
+
+module.exports = async () => {
+    if (process.env.UPDATE_FRONT_END) {
+        console.log("Writing to front end...")
+        await updateContractAddresses()
+        console.log("Front end written!")
+    }
+}
+
+async function updateContractAddresses() {
+    const contractAddresses = JSON.parse(fs.readFileSync(frontEndContractsFile, "utf8"))
+    delete contractAddresses[network.config.chainId.toString()]
+    for (let i = 0; i < 5; i++) {
+        const stepContract = await ethers.getContract(STEP[i])
+        if (network.config.chainId.toString() in contractAddresses) {
+            if (
+                !contractAddresses[network.config.chainId.toString()].includes(stepContract.address)
+            ) {
+                contractAddresses[network.config.chainId.toString()].push(stepContract.address)
+            }
+        } else {
+            contractAddresses[network.config.chainId.toString()] = [stepContract.address]
+        }
+        fs.writeFileSync(frontEndContractsFile, JSON.stringify(contractAddresses))
+    }
+}
+
+const thePath = path.resolve(__dirname, "../", "contracts", "StepContract.sol")
+const source = fs.readFileSync(thePath, "utf-8")
+
+module.exports.tags = ["all", "frontend"]
