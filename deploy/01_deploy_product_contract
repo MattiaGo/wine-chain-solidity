@@ -1,0 +1,64 @@
+const { network, ethers } = require("hardhat")
+const { developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } = require("../helper-hardhat-config")
+const { verify } = require("../utils/verify")
+
+const CHAIN_ID = "WINE CONSORTIUM"
+const STEP = ["Grape Grower", "Wine Producer", "Bulk Distributor", "Filler-Packer", "Distributor"]
+const COMPANY_NAME = [
+    "Azienda Agricola Rossi",
+    "Vino consorziale",
+    "F.lli Bianchi Trasporti",
+    "Imobottigliatori Verdi",
+    "Vino&Vino Distribution",
+]
+
+const toHex = (string) => {
+    return ethers.utils.formatBytes32String(string) //web3.utils.utf8ToHex(string)
+}
+
+module.exports = async ({ getNamedAccounts, deployments }) => {
+    const { deploy, log } = deployments
+    const { deployer } = await getNamedAccounts()
+
+    let company_name, chain_ID, chain_step
+
+    company_name = "BERLUCCHI SRL"
+    chain_ID = "CHAINX"
+    chain_step = "VITICOLTORE"
+
+    const waitBlockConfirmations = developmentChains.includes(network.name)
+        ? 1
+        : VERIFICATION_BLOCK_CONFIRMATIONS
+
+    log("----------------------------------------------------")
+
+    const arguments = [toHex(chain_ID), toHex(chain_step), toHex(company_name)] // parent_contracts, document_hashes]
+
+    const stepContract = await deploy("StepContract", {
+        from: deployer,
+        contract: "StepContract",
+        args: arguments,
+        log: true,
+        waitConfirmations: waitBlockConfirmations,
+    })
+
+    PC = []
+    for (let i = 0; i < 5; i++) {
+        PC[i] = await deploy(STEP[i], {
+            from: deployer,
+            contract: "StepContract",
+            args: [toHex(CHAIN_ID), toHex(STEP[i]), toHex(COMPANY_NAME[i])],
+            log: true,
+            waitConfirmations: waitBlockConfirmations,
+        })
+        console.log("BlockNumber:" + PC[i].receipt.blockNumber)
+    }
+
+    // Verify the deployment
+    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+        log("Verifying...")
+        await verify(stepContract.address, arguments)
+    }
+}
+
+module.exports.tags = ["all"]
