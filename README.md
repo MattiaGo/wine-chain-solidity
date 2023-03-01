@@ -4,6 +4,7 @@ Solidity smart contract for a wine blockchain
 
 ### Prerequisites
 
+-   Solc compiler
 -   Npm
 -   Node.js
 -   Ganache
