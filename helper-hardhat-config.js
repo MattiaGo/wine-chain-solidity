@@ -41,6 +41,4 @@ module.exports = {
     developmentChains,
     VERIFICATION_BLOCK_CONFIRMATIONS,
     frontEndContractsFile,
-    frontEndAbiFile,
-    frontEndBytecode,
 }
